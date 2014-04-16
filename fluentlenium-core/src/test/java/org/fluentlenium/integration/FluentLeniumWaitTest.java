@@ -19,8 +19,7 @@ import com.google.common.base.Predicate;
 import org.fluentlenium.core.FluentAdapter;
 import org.fluentlenium.core.FluentPage;
 import org.fluentlenium.integration.localtest.LocalFluentCase;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -300,6 +299,13 @@ public class FluentLeniumWaitTest extends LocalFluentCase {
     public void checkPolling() {
         goTo(JAVASCRIPT_URL);
         await().pollingEvery(800, TimeUnit.MILLISECONDS).until("#default").hasText("wait");
+    }
+
+    @Test
+    @Ignore("Currently fails")
+    public void when_element_is_stale_no_exception_should_be_sent() {
+        goTo(JAVASCRIPT_URL);
+        await().atMost(800, TimeUnit.MILLISECONDS).until("#stale").hasText("Hello");
     }
 
 }
