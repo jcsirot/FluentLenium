@@ -307,13 +307,15 @@ public class FluentLeniumWaitTest extends LocalFluentCase {
     }
 
     @Test
-    @Ignore("Currently fails")
+    //@Ignore("Currently fails")
     public void when_element_is_stale_no_exception_should_be_sent() throws Exception {
         goTo(JAVASCRIPT_URL);
         await().atMost(1, NANOSECONDS).until("#stale").isPresent();
         FluentWebElement stale = findFirst("#stale");
         assertThat(stale.getText()).isEqualTo("nope");
-        Thread.sleep(1000);
+        Thread.sleep(1500);
+        FluentWebElement stale2 = findFirst("#stale");
+        assertThat(stale2.getText()).isEqualTo("Hello");
         assertThat(stale.getText()).isEqualTo("Hello");
 
     }

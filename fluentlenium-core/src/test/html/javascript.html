@@ -41,6 +41,7 @@
 
     setTimeout(function() {
      var stale = document.createElement("div");
+     stale.id = "stale"
      stale.innerHTML="Hello";
      document.getElementById("parent").appendChild(stale);
     },750);
