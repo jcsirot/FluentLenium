@@ -19,6 +19,7 @@ import com.google.common.base.Predicate;
 import org.fluentlenium.core.Fluent;
 import org.fluentlenium.core.FluentAdapter;
 import org.fluentlenium.core.FluentPage;
+import org.fluentlenium.core.domain.FluentWebElement;
 import org.fluentlenium.integration.localtest.LocalFluentCase;
 import org.junit.*;
 import org.openqa.selenium.By;
@@ -307,9 +308,14 @@ public class FluentLeniumWaitTest extends LocalFluentCase {
 
     @Test
     @Ignore("Currently fails")
-    public void when_element_is_stale_no_exception_should_be_sent() {
+    public void when_element_is_stale_no_exception_should_be_sent() throws Exception {
         goTo(JAVASCRIPT_URL);
-        await().atMost(800, TimeUnit.MILLISECONDS).until("#stale").hasText("Hello");
+        await().atMost(1, NANOSECONDS).until("#stale").isPresent();
+        FluentWebElement stale = findFirst("#stale");
+        assertThat(stale.getText()).isEqualTo("nope");
+        Thread.sleep(1000);
+        assertThat(stale.getText()).isEqualTo("Hello");
+
     }
 
     @Test
