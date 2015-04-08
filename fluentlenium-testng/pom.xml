@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.fluentlenium</groupId>
         <artifactId>fluentlenium-parent</artifactId>
-        <version>0.9.3-SNAPSHOT</version>
+        <version>0.10.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>fluentlenium-testng</artifactId>
@@ -44,7 +44,7 @@
         </developer>
     </developers>
     <properties>
-        <testng.version>6.1.1</testng.version>
+        <testng.version>6.8.17</testng.version>
     </properties>
     <dependencies>
         <dependency>
@@ -59,8 +59,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -12,27 +12,26 @@
  * limitations under the License
  */
 
-package org.fluentlenium.integration.shareddriver;
+package org.fluentlenium.assertj.custom;
 
-import org.fluentlenium.adapter.util.SharedDriver;
-import org.fluentlenium.integration.localtest.LocalFluentCase;
-import org.junit.Test;
+import org.assertj.core.api.AbstractAssert;
+import org.fluentlenium.core.FluentPage;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fluentlenium.core.filter.FilterConstructor.withName;
-
-@SharedDriver
-public class SharedDriverOnce2Test extends LocalFluentCase {
+public class PageAssert extends AbstractAssert<PageAssert, FluentPage> {
 
 
+    public PageAssert(FluentPage actual) {
+        super(actual, PageAssert.class);
+    }
 
-
-  @Test
-  public void secondMethod() {
-    assertThat($(".small", withName("name"))).hasSize(1);
-  }
-
-
-
+    /**
+     * check if it is at the current page. Call the page.isAt() methods
+     *
+     * @return
+     */
+    public PageAssert isAt() {
+        actual.isAt();
+        return this;
+    }
 
 }

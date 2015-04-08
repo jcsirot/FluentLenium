@@ -20,23 +20,22 @@ import org.fest.assertions.fluentlenium.custom.FluentWebElementAssert;
 import org.fluentlenium.core.domain.FluentWebElement;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.when;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openqa.selenium.Dimension;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
+@RunWith(MockitoJUnitRunner.class)
 public class FluentWebElementTest {
     @Mock
     FluentWebElement fluentWebElement;
-    @InjectMocks
-    FluentWebElementAssert fluentWebElementAssert = FluentLeniumAssertions.assertThat(fluentWebElement);
+
+    FluentWebElementAssert fluentWebElementAssert;
 
     @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+    public void setup() {
+      fluentWebElementAssert = FluentLeniumAssertions.assertThat(fluentWebElement);
     }
 
     @Test
@@ -46,74 +45,67 @@ public class FluentWebElementTest {
     }
 
     @Test(expected = AssertionError.class)
-    public void testIsEnabledKo() throws Exception {
+    public void testIsEnabledKo() {
         when(fluentWebElement.isEnabled()).thenReturn(false);
         fluentWebElementAssert.isEnabled();
     }
 
-
     @Test
-    public void testIsNotEnabledOk() throws Exception {
+    public void testIsNotEnabledOk() {
         when(fluentWebElement.isEnabled()).thenReturn(false);
         fluentWebElementAssert.isNotEnabled();
-        assertTrue(true);
     }
 
-
     @Test(expected = AssertionError.class)
-    public void testIsNotEnabledKo() throws Exception {
+    public void testIsNotEnabledKo() {
         when(fluentWebElement.isEnabled()).thenReturn(true);
         fluentWebElementAssert.isNotEnabled();
     }
 
     @Test
-    public void testIsDisplayedOk() throws Exception {
+    public void testIsDisplayedOk() {
         when(fluentWebElement.isDisplayed()).thenReturn(true);
         fluentWebElementAssert.isDisplayed();
-        assertTrue(true);
     }
 
     @Test(expected = AssertionError.class)
-    public void testIsDisplayedKo() throws Exception {
+    public void testIsDisplayedKo() {
         when(fluentWebElement.isDisplayed()).thenReturn(false);
         fluentWebElementAssert.isDisplayed();
     }
 
     @Test
-    public void testIsNotDisplayed() throws Exception {
+    public void testIsNotDisplayed() {
         when(fluentWebElement.isDisplayed()).thenReturn(false);
         fluentWebElementAssert.isNotDisplayed();
-        assertTrue(true);
     }
 
     @Test(expected = AssertionError.class)
-    public void testIsSelected() throws Exception {
+    public void testIsSelected() {
         when(fluentWebElement.isDisplayed()).thenReturn(true);
         fluentWebElementAssert.isNotDisplayed();
     }
 
     @Test
-    public void testIsNotSelectedOk() throws Exception {
+    public void testIsNotSelectedOk() {
         when(fluentWebElement.isSelected()).thenReturn(false);
         fluentWebElementAssert.isNotSelected();
-        assertTrue(true);
     }
 
     @Test(expected = AssertionError.class)
-    public void testIsNotSelectedKo() throws Exception {
+    public void testIsNotSelectedKo() {
         when(fluentWebElement.isSelected()).thenReturn(true);
         fluentWebElementAssert.isNotSelected();
     }
 
     @Test
-    public void testIsSelectedOk() throws Exception {
+    public void testIsSelectedOk() {
         when(fluentWebElement.isSelected()).thenReturn(true);
         fluentWebElementAssert.isSelected();
-        assertTrue(true);
     }
 
     @Test(expected = AssertionError.class)
-    public void testIsSelectedKo() throws Exception {
+    public void testIsSelectedKo() {
         when(fluentWebElement.isSelected()).thenReturn(false);
         fluentWebElementAssert.isSelected();
     }
@@ -122,7 +114,6 @@ public class FluentWebElementTest {
     public void testHasIdOk() throws Exception {
         when(fluentWebElement.getId()).thenReturn("some id");
         fluentWebElementAssert.hasId("some id");
-        assertTrue(true);
     }
 
     @Test(expected = AssertionError.class)
@@ -130,18 +121,18 @@ public class FluentWebElementTest {
         when(fluentWebElement.getId()).thenReturn("other id");
         fluentWebElementAssert.hasId("some id");
     }
-	
-	@Test
-	public void testHasClassOk() throws Exception {
-		when(fluentWebElement.getAttribute("class")).thenReturn("some class");
-        fluentWebElementAssert.hasClass("some class");
-	}
 
-	@Test(expected = AssertionError.class)
-	public void testHasClassKo() throws Exception {
-		when(fluentWebElement.getAttribute("class")).thenReturn("other class");
+    @Test
+    public void testHasClassOk() throws Exception {
+        when(fluentWebElement.getAttribute("class")).thenReturn("some class");
         fluentWebElementAssert.hasClass("some class");
-	}
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testHasClassKo() throws Exception {
+        when(fluentWebElement.getAttribute("class")).thenReturn("other class");
+        fluentWebElementAssert.hasClass("some class");
+    }
 
     @Test(expected = AssertionError.class)
     public void testHasAttributeKo() throws Exception {

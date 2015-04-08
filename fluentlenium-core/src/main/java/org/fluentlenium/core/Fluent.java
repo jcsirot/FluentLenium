@@ -20,8 +20,9 @@ import org.fluentlenium.core.action.FillSelectConstructor;
 import org.fluentlenium.core.action.FluentDefaultActions;
 import org.fluentlenium.core.annotation.AjaxElement;
 import org.fluentlenium.core.annotation.Page;
-import org.fluentlenium.core.domain.FluentList;
+import org.fluentlenium.core.domain.FluentJavascript;
 import org.fluentlenium.core.domain.FluentWebElement;
+import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.core.exception.ConstructionException;
 import org.fluentlenium.core.filter.Filter;
 import org.fluentlenium.core.search.Search;
@@ -169,9 +170,9 @@ public abstract class Fluent implements SearchActions {
     protected <T extends FluentPage> T initClass(Class<T> cls) {
         T page = null;
         try {
-            Constructor construct = cls.getDeclaredConstructor();
+            Constructor<T> construct = cls.getDeclaredConstructor();
             construct.setAccessible(true);
-            page = (T) construct.newInstance();
+            page = construct.newInstance();
             Class parent = Class.forName(Fluent.class.getName());
             initDriver(page, parent);
             initBaseUrl(page, parent);
@@ -252,7 +253,7 @@ public abstract class Fluent implements SearchActions {
      * @return
      */
     public FluentWait await() {
-        return new FluentWait(driver, search);
+        return new FluentWait(this, search);
     }
 
 
@@ -338,10 +339,14 @@ public abstract class Fluent implements SearchActions {
     }
 
 
-    public Fluent executeScript(String script) {
-        ((JavascriptExecutor) driver).executeScript(script);
-        return this;
+    public FluentJavascript executeScript(String script, Object... args) {
+        return new FluentJavascript(this.driver, false, script, args);
     }
+
+    public FluentJavascript executeAsyncScript(String script, Object... args) {
+        return new FluentJavascript(this.driver, true, script, args);
+    }
+
 
     /**
      * Central methods to find elements on the page. Can provide some filters. Able to use css1, css2, css3, see WebDriver  restrictions
@@ -369,6 +374,7 @@ public abstract class Fluent implements SearchActions {
 
     /**
      * return the lists corresponding to the cssSelector with it filters
+     *
      *
      * @param name
      * @param filters

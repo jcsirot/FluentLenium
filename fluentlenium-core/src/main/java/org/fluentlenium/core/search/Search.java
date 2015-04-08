@@ -17,8 +17,9 @@ package org.fluentlenium.core.search;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import org.fluentlenium.core.domain.FluentList;
+import org.fluentlenium.core.domain.FluentListImpl;
 import org.fluentlenium.core.domain.FluentWebElement;
+import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.core.filter.Filter;
 import org.fluentlenium.core.filter.FilterPredicate;
 import org.openqa.selenium.By;
@@ -31,7 +32,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class Search implements SearchActions {
+public class Search implements SearchActions<FluentWebElement> {
     private final SearchContext searchContext;
 
     public Search(SearchContext context) {
@@ -57,13 +58,12 @@ public class Search implements SearchActions {
                 }
             }
         }
-        List<FluentWebElement> preFiltered = select(sb.toString());
-        Collection<FluentWebElement> postFiltered = preFiltered;
+        Collection<FluentWebElement> postFiltered = select(sb.toString());
         for (Filter selector : postFilterSelector) {
             postFiltered = Collections2.filter(postFiltered, new FilterPredicate(selector));
         }
 
-        return new FluentList(postFiltered);
+        return new FluentListImpl<FluentWebElement>(postFiltered);
     }
 
     private List<FluentWebElement> select(String cssSelector) {
@@ -86,7 +86,7 @@ public class Search implements SearchActions {
     public FluentWebElement find(String name, Integer number, final Filter... filters) {
         List<FluentWebElement> listFiltered = find(name, filters);
         if (number >= listFiltered.size()) {
-            throw new NoSuchElementException("No such element with position :" + number + ". Number of elements available :" + listFiltered.size());
+            throw new NoSuchElementException("No such element with position: " + number + ". Number of elements available: " + listFiltered.size() + ". Selector: " + name + ".");
         }
         return listFiltered.get(number);
     }
@@ -100,7 +100,11 @@ public class Search implements SearchActions {
      */
     public FluentWebElement findFirst(String name, final Filter... filters) {
         FluentList fluentList = find(name, filters);
-        return fluentList.first();
+        try {
+            return fluentList.first();
+        } catch(NoSuchElementException e) {
+            throw new NoSuchElementException("Could not find element matching selector: " + name + ".", e);
+        }
     }
 
 }

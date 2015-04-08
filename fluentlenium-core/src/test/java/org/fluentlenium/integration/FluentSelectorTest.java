@@ -17,7 +17,7 @@ package org.fluentlenium.integration;
 import org.fluentlenium.integration.localtest.LocalFluentCase;
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.*;
 import static org.fluentlenium.core.filter.MatcherConstructor.regex;
 
@@ -167,13 +167,13 @@ public class FluentSelectorTest extends LocalFluentCase {
 
     @Test
     public void checkClassContainsSelector() {
-    goTo(DEFAULT_URL);
+        goTo(DEFAULT_URL);
         assertThat($("button", withClass().contains("class"), withClass().containsWord("class2"))).hasSize(1);
     }
 
     @Test
     public void checkClassContainsWordSelector() {
-    goTo(DEFAULT_URL);
+        goTo(DEFAULT_URL);
         assertThat($("button", withClass().containsWord("class"))).hasSize(0);
     }
 }

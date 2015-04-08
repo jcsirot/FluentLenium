@@ -23,7 +23,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DefaultWaitOnLabsTest extends SauceLabsFluentCase {
     @Before
@@ -39,7 +39,7 @@ public class DefaultWaitOnLabsTest extends SauceLabsFluentCase {
 
     @Override
     public void setDefaultConfig() {
-        withDefaultSearchWait(5, TimeUnit.HOURS);
+        withDefaultSearchWait(20, TimeUnit.SECONDS);
     }
 
     @Test

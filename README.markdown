@@ -3,14 +3,14 @@
 FluentLenium is a framework that helps you to write [Selenium](http://seleniumhq.org/) tests.
 FluentLenium provides you a [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface) to the [Selenium Web Driver](http://seleniumhq.org/docs/03_webdriver.html).
 FluentLenium lets you use the assertion framework you like, either [jUnit assertions](http://www.junit.org/apidocs/org/junit/Assert.html), [Hamcrest](http://code.google.com/p/hamcrest/wiki/Tutorial) 
-or [Fest-assert](http://docs.codehaus.org/display/FEST/Fluent+Assertions+Module).
+or [AssertJ](https://github.com/joel-costigliola/assertj-core)  (old one: ~~[Fest-assert](https://github.com/alexruiz/fest-assert-2.x/wiki)~~).
 
 
 # 5 second example
 ```java
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BingTest extends FluentTest {
     @Test
@@ -31,31 +31,31 @@ To add FluentLenium to your project, just add the following dependency to your `
 <dependency>
     <groupId>org.fluentlenium</groupId>
     <artifactId>fluentlenium-core</artifactId>
-    <version>0.9.2</version>
+    <version>0.10.3</version>
     <scope>test</scope>
 </dependency>
 ```
 
 By default, FluentLenium provides a jUnit adapter.
 
-If you need the fest-assert dependency to improve the legibility of your test code :
+If you need the assertj dependency to improve the legibility of your test code:
 
 ```xml 
 <dependency>
     <groupId>org.fluentlenium</groupId>
-    <artifactId>fluentlenium-festassert</artifactId>
-    <version>0.9.2</version>
+    <artifactId>fluentlenium-assertj</artifactId>
+    <version>0.10.3</version>
     <scope>test</scope>
 </dependency>
 ```
 
-An adapter has also been built for using FluentLenium with TestNG :
+An adapter has also been built for using FluentLenium with TestNG:
 
 ```xml
 <dependency>
     <groupId>org.fluentlenium</groupId>
     <artifactId>fluentlenium-testng</artifactId>
-    <version>0.9.2</version>
+    <version>0.10.3</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -64,18 +64,18 @@ Just extend `org.fluentlenium.adapter.FluentTestNg` instead of `org.fluentlenium
 
 ##Static imports
 
-If you need to do some filtering :
+If you need to do some filtering:
 
 ```java
 import static org.fluentlenium.core.filter.FilterConstructor.*;
 ```
 
-### Static import using fest assert
-The static assertions to use fest assert are :
+### Static import using AssertJ
+The static assertions to use AssertJ are:
 
 ```java
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.fluentlenium.FluentLeniumAssertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.fluentlenium.assertj.FluentLeniumAssertions.assertThat;
 ```
 
 ### Basic Methods
@@ -85,7 +85,7 @@ You can use `url()` , `title()` or `pageSource()` to get the url, the title or t
 #### Default Selector
 You can use CSS1, CSS2 and CSS3 selectors with the same restrictions as in Selenium.
 
-If you want to find the list of elements which have :
+If you want to find the list of elements which have:
 
   - the `id` "title" : `find("#title")`
   - the `class` name "small" : `find(".small")`
@@ -97,7 +97,7 @@ will return the list of all input elements which have the class rightForm
 
 #### Custom filter
 But what if you want all the input that have text equal to "Sam" ?
-You can use filters to allow that kind of search. For example :
+You can use filters to allow that kind of search. For example:
 
 ```java
 find(".small", withName("foo"))
@@ -106,10 +106,10 @@ find(".small", withId("idOne"))
 find(".small", withText("This field is mandatory."))
 ```
 
-You can also write chained filters :
+You can also write chained filters:
 `find(".small", withName("foo"), withId("id1"))` will return all the elements matching the 3 criteria.
 
-You can do more complex string matching on the above filters using the following methods :
+You can do more complex string matching on the above filters using the following methods:
 
   - `contains`
   - `containsWord`
@@ -119,7 +119,7 @@ You can do more complex string matching on the above filters using the following
   - `endsWith`
   - `notEndsWith`
 
-For each of them, you can choose to use a css selector :
+For each of them, you can choose to use a css selector:
 
 ```java
 find(".small", withName().notContains("name"))
@@ -127,7 +127,7 @@ find(".small", withId().notStartsWith("id"))
 find(".small", withText().endsWith("Female"))
 ```
 
-Or to be more precise, you can use regular expressions :
+Or to be more precise, you can use regular expressions:
 
 ```java
 find(".small", withName().contains(regex("na?me[0-9]*")))
@@ -138,7 +138,7 @@ Contains, startsWith and endsWith with a regexp pattern look for a subsection of
 
 
 ### N-th
-If you want the first element that matches your criteria, just use :
+If you want the first element that matches your criteria, just use:
 
 ```java
 findFirst(myCssSelector)
@@ -150,13 +150,13 @@ or alternatively
 find(myCssSelector).first()
 ```
 
-If you want the element at the given position :
+If you want the element at the given position:
 
 ```java
 find(myCssSelector, 2)
 ```
 
-Of course, you can use both position filter and custom filter :
+Of course, you can use both position filter and custom filter:
 
 ```java
 find(myCssSelector, 2, withName("foo"))
@@ -164,9 +164,9 @@ find(myCssSelector, 2, withName("foo"))
 
 
 #### Find on children
-You can also chain the find call :
+You can also chain the find call:
 `find(myCssSelector).find("input")` will return all the input elements in the css selector tree.
-You can be more specific :
+You can be more specific:
 
 ```java
 find(myCssSelector, 2, withName("foo")).find("input", withName("bar"))
@@ -179,7 +179,7 @@ find(myCssSelector, 2, withName("foo")).findFirst("input", withName("bar"))
 ```
 
 ## Element
-If you need to access to the name, the id, the value, the tagname or the text of an element :
+If you need to access to the name, the id, the value, the tagname or the text of an element:
 
 ```java
 findFirst(myCssSelector).getName()
@@ -324,7 +324,7 @@ public void checkLoginFailed() {
 }
 ```
 
-Or if you have the [Fest-assert](http://docs.codehaus.org/display/FEST/Fluent+Assertions+Module) module (just static import org.fest.assertions.fluentlenium.FluentLeniumAssertions.assertThat)
+Or if you have the [AssertJ](https://github.com/joel-costigliola/assertj-core) module (just static import org.fluentlenium.assertj.FluentLeniumAssertions.assertThat)
 
 ```java
 public void checkLoginFailed() {
@@ -362,7 +362,7 @@ public class AnnotationInitialization extends FluentTest {
 
 }
 ```
-It's now possible to use the @Page annotation in a FluentPage.
+It's now possible to use the `@Page` annotation in a FluentPage.
 
 You can also use the factory method `createPage`:
 
@@ -405,6 +405,30 @@ public class LoginPage extends FluentPage {
 }
 ```
 
+Not only FluentWebElement fields are populated. Every type with a constructor taking a WebElement is a candidate.
+This makes it possible for the page to expose fields with functional methods and not (only) the 'technical' methods
+that FluentWebElement exposes.
+
+```java
+public class LoginPage extends FluentPage {
+   MyButton createButton;
+   public void fillAndSubmitForm(String... paramsOrdered) {
+       fill("input").with(paramsOrdered);
+       createButton.clickTwice();
+   }
+   public static class MyButton {
+       WebElement webElement;
+       public MyButton(WebElement webElement) {
+           this.webElement = webElement;
+       }
+       public void clickTwice() {
+           webElement.click();
+           webElement.click();
+       }
+   }
+}
+```
+
 If the naming conventions of your HTML ids and names don't match with the naming conventions of your Java fields,
 or if you want to select an element with something other than the id or name, you can annotate the field with the
 Selenium `@FindBy` (or `@FindBys`) annotation. The following example shows how to find the create button if its CSS class is
@@ -427,7 +451,7 @@ public class LoginPage extends FluentPage {
 }
 ```
 
-If you need to wait for an element to be present, especially when waiting for an ajax call to complete, you can use the @AjaxElement annotation on the fields :
+If you need to wait for an element to be present, especially when waiting for an ajax call to complete, you can use the @AjaxElement annotation on the fields:
 
 ```java
 public class LoginPage extends FluentPage {
@@ -469,7 +493,7 @@ await().atMost(5, TimeUnit.SECONDS).until(".small").withText().startsWith("start
      
 Just use `startsWith`, `notStartsWith`, `endsWith`, `notEndsWith`, `contains`, `notContains`, `equalTo`, `containsWord`.
 
-If you need to filter on a custom attribute name, this syntax will help :
+If you need to filter on a custom attribute name, this syntax will help:
 
 ```java
 await().atMost(5, TimeUnit.SECONDS).until(".small").with("myAttribute").startsWith("myValue").isPresent();
@@ -480,14 +504,14 @@ You can also check if the page is loaded using
 await().atMost(1, NANOSECONDS).untilPage().isLoaded();
 ```
 
-If you want to wait until the page you want is the page that you are at, you can use :
+If you want to wait until the page you want is the page that you are at, you can use:
 ```java
 await().atMost(5, TimeUnit.SECONDS).untilPage(myPage).isAt();
 ```
 This methods actually calls myPage.isAt(). If the isAt() method of the myPage object does not throw any exception during the time specified, then the framework will consider that the page is the one wanted.
 
 ### Polling Every
-You can also define the polling frequency, for example, if you want to poll every 5 seconds :
+You can also define the polling frequency, for example, if you want to poll every 5 seconds:
 ```java
 await().pollingEvery(5, TimeUnit.SECONDS).until(".small").with("myAttribute").startsWith("myValue").isPresent();
 ```
@@ -509,7 +533,7 @@ $("#create-button").click();
 assertThat(title()).isEqualTo("Hello toto");
 ```
 
-Both syntaxes are equivalent. `$` is simply an alias for the `find` method.
+Both syntax are equivalent. `$` is simply an alias for the `find` method.
 
 
 ## Execute javascript
@@ -520,15 +544,21 @@ For example, if you have a javascript method called change and you want to call 
 executeScript("change();");
 ```
 
+You can either execute javascript with arguments, with async `executeAsyncScript`, and retrieve the result.
+
+```java
+executeScript("change();", 12L).getStringResult();
+```
+
 ## Taking Snapshots
 You can take a snaphost of the browser
 ```java
-driver.takeScreenShot();
+takeScreenShot();
 ```
 The file will be named using the current timestamp.
-You can of course specify a path and a name using :
+You can of course specify a path and a name using:
 ```java
-driver.takeScreenShot(pathAndfileName);
+takeScreenShot(pathAndfileName);
 ```
 
 ## Isolate Tests
@@ -551,12 +581,12 @@ If you want to defined a default base url, just override the `getDefaultBaseUrl`
 If a base url is provided, the current url will be relative to that base url.
 
 ### TimeOut
-To set the time to wait when searching an element, you can use in your test :
+To set the time to wait when searching an element, you can use in your test:
 ```java
 withDefaultSearchWait(long l, TimeUnit timeUnit);
 ```
 
- To set the time to wait when loading a page, you can use :
+ To set the time to wait when loading a page, you can use:
 ```java
 withDefaultPageWait(long l, TimeUnit timeUnit);
 ```
@@ -564,13 +594,13 @@ withDefaultPageWait(long l, TimeUnit timeUnit);
 Be aware that when you modified this elements, the webDriver instance will be modified so your page will also be affected.
 
 ### Configuration
-You can defined a default driver configuration using to ways.
+You can define a default driver configuration using two ways.
 First, just override the getDriver method and use the selenium way to configure your driver.
 You can also override the setDefaultConfig method and use both selenium and FluentLenium way (withDefaultSearchWait,withDefaultPageWait) to configure your driver.
 
 ## Browser Lifecycle
-For jUnit and testNG, you can defined the browser lifecycle.
-Use the class annotation @SharedDriver and you will be able to defined how the driver will be created :
+For jUnit and testNG, you can define the browser lifecycle.
+Use the class annotation @SharedDriver and you will be able to define how the driver will be created:
 ```java
 @SharedDriver(type = SharedDriver.SharedType.ONCE)
 ``` 
@@ -592,7 +622,7 @@ You will also be able to decide if you want to clean the cookies between two met
 If you want to switch the Selenium webDriver to an iframe (see this [Selenium FAQ](https://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions#Q:_How_do_I_type_into_a_contentEditable_iframe?)),
 you can just call the method switchTo() :
 
-To switch to the default context :
+To switch to the default context:
 ```java
 switchTo();
 ```
@@ -601,7 +631,7 @@ or
 switchToDefault();
 ```
 
-To switch to the iframe selected :
+To switch to the iframe selected:
 ```java
 switchTo(find("iframe#frameid"));
 ```
@@ -609,35 +639,35 @@ switchTo(find("iframe#frameid"));
 ##Alert
 If you want manage alert (see this [Selenium FAQ](http://code.google.com/p/selenium/wiki/FrequentlyAskedQuestions#Q:_Does_WebDriver_support_Javascript_alerts_and_prompts?)),
 
-When an alert box pops up, click on "OK" :
+When an alert box pops up, click on "OK":
 ```java
 alert().accept();
 ```
 
-When an alert box pops up, click on "Cancel"
+When an alert box pops up, click on "Cancel":
 ```java
 alert().dismiss();
 ```
 
-Entering an input value in prompt
+Entering an input value in prompt:
 ```java
 alert().prompt("FluentLenium")
 ```
 
 ##Window
-Maximize browser window
+Maximize browser window:
 ```java
 maximizeWindow();
 ```
 
 ##Users/dev
-If you have any comments/remarks/bugs, please raise a issue on github : 
+If you have any comments/remarks/bugs, please raise an issue on github:
 [FluentLenium](https://github.com/FluentLenium/FluentLenium/issues) or contact us through the [mailing-list](https://groups.google.com/group/fluentlenium)
 
 ## FluentLenium and other frameworks
 
 ### jUnit
-FluentLenium uses jUnit by default. You can use test using [jUnit](http://www.junit.org) assertions, but can of course use others frameworks such as [Fluent-assert](https://github.com/alexruiz/fest-assert-2.x/wiki) or [Hamcrest](http://code.google.com/p/hamcrest/).
+FluentLenium uses jUnit by default. You can use test using [jUnit](http://www.junit.org) assertions, but can of course use others frameworks such as [AssertJ](https://github.com/joel-costigliola/assertj-core) or [Hamcrest](http://code.google.com/p/hamcrest/).
 
 ```java
 goTo("http://mywebpage/");
@@ -647,6 +677,9 @@ assertEqual("Hello toto",title());
 ```
 
 ### Fest-Assert
+Fest-Assert is now deprecated. This lib is no longer maintained. Consider switching to AssertJ
+
+### AssertJ
 ```java
 goTo("http://mywebpage/");
 fill("#firstName").with("toto");
@@ -661,6 +694,7 @@ assertThat(find(myCssSelecto3)).hasSize().greaterThan(2);
 assertThat(find(myCssSelecto3)).hasSize().greaterThanOrEqualTo(2);
 ```
 
+
 ### Hamcrest
 ```java
 goTo("http://mywebpage/");
@@ -670,12 +704,11 @@ assertThat(title(),equalTo("Hello toto"));
 ```
 ##Resources
 
-In English :
+In English:
 
-  - [Play2 and FluentLenium screencast](http://www.youtube.com/watch?v=diVhWRtJuxU) and the associated (code)[http://ics-software-engineering.github.io/play-example-fluentlenium/
-]
+  - [Play2 and FluentLenium screencast](http://www.youtube.com/watch?v=diVhWRtJuxU)  and the associated [code] (http://ics-software-engineering.github.io/play-example-fluentlenium/)
 
-In French :
+In French:
 
   - [SlideShare](http://www.slideshare.net/MathildeLemee/fluentlenium)
   - [Cucumber and FluentLenium - more to come](http://blog.jetoile.fr/2013/04/fluentlenium-et-cucumber-jvm-complement.html)

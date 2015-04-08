@@ -15,6 +15,7 @@
 package org.fluentlenium.core.domain;
 
 import org.fluentlenium.core.FluentThread;
+import org.fluentlenium.core.action.FillConstructor;
 import org.fluentlenium.core.action.FluentDefaultActions;
 import org.fluentlenium.core.filter.Filter;
 import org.fluentlenium.core.search.Search;
@@ -27,7 +28,7 @@ import org.openqa.selenium.interactions.Actions;
 /**
  * WebElementCustom include a Selenium WebElement. It provides a lot of shortcuts to make selenium more fluent
  */
-public class FluentWebElement implements FluentDefaultActions<FluentWebElement>, SearchActions {
+public class FluentWebElement implements FluentDefaultActions<FluentWebElement>, SearchActions<FluentWebElement> {
     private final WebElement webElement;
     private final Search search;
 
@@ -57,7 +58,9 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
      * Clear the element
      */
     public FluentWebElement clear() {
-        webElement.clear();
+        if (!isInputOfTypeFile()) {
+            webElement.clear();
+        }
         return this;
     }
 
@@ -70,12 +73,12 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
     }
 
     /**
-     * Set the text elelent
+     * Set the text element
      *
      * @param text
      */
     public FluentWebElement text(String... text) {
-        webElement.clear();
+        clear();
         if (text.length != 0) {
             webElement.sendKeys(text[0]);
         }
@@ -129,7 +132,7 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
     }
 
     /**
-     * return true if the element is displayed, otherway return false
+     * return true if the element is displayed, other way return false
      *
      * @return
      */
@@ -138,7 +141,7 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
     }
 
     /**
-     * return true if the element is enabled, otherway return false
+     * return true if the element is enabled, other way return false
      *
      * @return
      */
@@ -147,7 +150,7 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
     }
 
     /**
-     * return true if the element is selected, otherway false
+     * return true if the element is selected, other way false
      *
      * @return
      */
@@ -189,12 +192,12 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
      * @param filters
      * @return
      */
-    public FluentList find(String name, Filter... filters) {
+    public FluentList<FluentWebElement> find(String name, Filter... filters) {
         return search.find(name, filters);
     }
 
     /**
-     * find elements into the childs with the corresponding filters at the given positiokn
+     * find elements into the childs with the corresponding filters at the given position
      *
      * @param name
      * @param filters
@@ -205,7 +208,7 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
     }
 
     /**
-     * find elements into the childs with the corresponding filters at the first position
+     * find elements into the children with the corresponding filters at the first position
      *
      * @param name
      * @param filters
@@ -222,5 +225,21 @@ public class FluentWebElement implements FluentDefaultActions<FluentWebElement>,
      */
     public String html() {
         return webElement.getAttribute("innerHTML");
+    }
+
+    /**
+     * Construct a FillConstructor in order to allow easy fill
+     * Be careful - only the visible elements are filled
+     */
+    public FillConstructor fill() {
+      return new FillConstructor(this, FluentThread.get().getDriver());
+    }
+
+    /**
+     * This method return true if the current FluentWebElement is an input of type file
+     */
+    private boolean isInputOfTypeFile(){
+        return ("input".equalsIgnoreCase(this.getTagName()) &&
+            "file".equalsIgnoreCase(this.getAttribute("type")));
     }
 }

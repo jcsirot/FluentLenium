@@ -17,7 +17,7 @@ package org.fluentlenium.integration;
 import org.fluentlenium.integration.localtest.SauceLabsFluentCase;
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.fluentlenium.core.filter.FilterConstructor.*;
 import static org.fluentlenium.core.filter.MatcherConstructor.*;
 
@@ -205,7 +205,7 @@ public class SelectorOnLabsTest extends SauceLabsFluentCase {
     @Test
     public void checkHtmlAction() {
         goTo(DEFAULT_URL);
-        assertThat($("#pharnacy").first().html().equals("Pharmacy"));
+        assertThat($("#location").first().html().equals("Pharmacy"));
     }
 
 }

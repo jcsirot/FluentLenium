@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.fluentlenium</groupId>
         <artifactId>fluentlenium-parent</artifactId>
-        <version>0.9.3-SNAPSHOT</version>
+        <version>0.10.4-SNAPSHOT</version>
     </parent>
     <artifactId>fluentlenium-core</artifactId>
     <packaging>jar</packaging>
@@ -60,8 +60,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -78,7 +78,6 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.6</version>
                         <configuration>
                             <includes>
                                 <include>**/integration/**Lab**</include>

@@ -13,8 +13,12 @@
  */
 package org.fluentlenium.core;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.fluentlenium.core.annotation.AjaxElement;
 import org.fluentlenium.core.annotation.Page;
+import org.fluentlenium.core.domain.FluentList;
+import org.fluentlenium.core.domain.FluentListImpl;
 import org.fluentlenium.core.domain.FluentWebElement;
 import org.fluentlenium.core.exception.ConstructionException;
 import org.openqa.selenium.WebDriver;
@@ -26,10 +30,20 @@ import org.openqa.selenium.support.pagefactory.ElementLocator;
 import org.openqa.selenium.support.pagefactory.ElementLocatorFactory;
 import org.openqa.selenium.support.pagefactory.internal.LocatingElementHandler;
 
-import java.lang.reflect.*;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class FluentAdapter extends Fluent {
+
+    private final ConcurrentMap<Class, FluentPage> pageInstances = new ConcurrentHashMap<Class, FluentPage>();
 
     public FluentAdapter(WebDriver webDriver) {
         super(webDriver);
@@ -40,15 +54,18 @@ public class FluentAdapter extends Fluent {
     }
 
     protected void initTest() {
-        Class cls = null;
         try {
             injectPageIntoContainer(this);
-             initFluentWebElements(this);
+            initFluentWebElements(this);
         } catch (ClassNotFoundException e) {
-            throw new ConstructionException("Class " + (cls != null ? cls.getName() : " null") + "not found", e);
+            throw new ConstructionException("Class not found", e);
         } catch (IllegalAccessException e) {
-            throw new ConstructionException("IllegalAccessException on class " + (cls != null ? cls.getName() : " null"), e);
+            throw new ConstructionException("IllegalAccessException", e);
         }
+    }
+
+    protected void cleanUp() {
+        pageInstances.clear();
     }
 
     private void injectPageIntoContainer(Fluent container)
@@ -61,9 +78,15 @@ public class FluentAdapter extends Fluent {
                     field.setAccessible(true);
                     Class clsField = field.getType();
                     Class clsPage = Class.forName(clsField.getName());
-                    FluentPage page = initClass(clsPage);
-                    field.set(container, page);
-                    injectPageIntoContainer(page);
+                    Fluent existingPage = pageInstances.get(clsPage);
+                    if (existingPage != null) {
+                        field.set(container, existingPage);
+                    } else {
+                        FluentPage page = initClass(clsPage);
+                        field.set(container, page);
+                        pageInstances.putIfAbsent(clsPage, page);
+                        injectPageIntoContainer(page);
+                    }
                 }
             }
         }
@@ -83,32 +106,31 @@ public class FluentAdapter extends Fluent {
 
 
     protected <T extends FluentPage> T initClass(Class<T> cls) {
-        T page = null;
         try {
-            Constructor construct = cls.getDeclaredConstructor();
+            Constructor<T> construct = cls.getDeclaredConstructor();
             construct.setAccessible(true);
-            page = (T) construct.newInstance();
+            T page = construct.newInstance();
             Class parent = Class.forName(Fluent.class.getName());
             initDriver(page, parent);
             initBaseUrl(page, parent);
 
             //init fields with default proxies
             initFluentWebElements(page);
+            return page;
         } catch (ClassNotFoundException e) {
-            throw new ConstructionException("Class " + (cls != null ? cls.getName() : " null") + "not found", e);
+            throw new ConstructionException("Class " + cls.getName() + "not found", e);
         } catch (IllegalAccessException e) {
-            throw new ConstructionException("IllegalAccessException on class " + (cls != null ? cls.getName() : " null"), e);
+            throw new ConstructionException("IllegalAccessException on class " + cls.getName(), e);
         } catch (NoSuchMethodException e) {
-            throw new ConstructionException("No constructor found on class " + (cls != null ? cls.getName() : " null"), e);
+            throw new ConstructionException("No constructor found on class " + cls.getName(), e);
         } catch (InstantiationException e) {
-            throw new ConstructionException("Unable to instantiate " + (cls != null ? cls.getName() : " null"), e);
+            throw new ConstructionException("Unable to instantiate " + cls.getName(), e);
         } catch (InvocationTargetException e) {
-            throw new ConstructionException("Cannot invoke method setDriver on " + (cls != null ? cls.getName() : " null"), e);
+            throw new ConstructionException("Cannot invoke method setDriver on " + cls.getName(), e);
         }
-        return page;
     }
 
-    private <T extends Fluent> void initFluentWebElements( T page) {
+    private <T extends Fluent> void initFluentWebElements(T page) {
         for (Class classz = page.getClass();
              FluentAdapter.class.isAssignableFrom(classz) || FluentPage.class.isAssignableFrom(classz);
              classz = classz.getSuperclass()) {
@@ -127,24 +149,33 @@ public class FluentAdapter extends Fluent {
     }
 
 
-    private boolean isFluentWebElementField(Field field) {
-        return FluentWebElement.class.isAssignableFrom(field.getType());
-    }
-
-    private <T extends FluentPage> void initBaseUrl(T page, Class parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Method m;
-        if (getBaseUrl() != null) {
-            m = parent.getDeclaredMethod("withDefaultUrl", String.class);
-            m.setAccessible(true);
-            m.invoke(page, getBaseUrl());
+    private <T extends FluentPage> void initBaseUrl(T page, Class<?> parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (getBaseUrl() == null) {
+            return;
         }
+
+        Method m = parent.getDeclaredMethod("withDefaultUrl", String.class);
+        m.setAccessible(true);
+        m.invoke(page, getBaseUrl());
     }
 
-    private <T extends FluentPage> void initDriver(T page, Class parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    private <T extends FluentPage> void initDriver(T page, Class<?> parent) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Method m = parent.getDeclaredMethod("initFluent", WebDriver.class);
         m.setAccessible(true);
         m.invoke(page, getDriver());
+    }
 
+    private boolean isFluentWebElementField(Field field) {
+        try {
+            return !Modifier.isFinal(field.getModifiers()) && (isFluentList(field) ||
+                    field.getType().getConstructor(WebElement.class) != null);
+        } catch (Exception e) {
+            return false; // Constructor not found
+        }
+    }
+
+    private static boolean isFluentList(Field field) {
+        return FluentList.class.isAssignableFrom(field.getType());
     }
 
     private static void proxyElement(ElementLocatorFactory factory, Object page, Field field) {
@@ -153,14 +184,48 @@ public class FluentAdapter extends Fluent {
             return;
         }
 
-        InvocationHandler handler = new LocatingElementHandler(locator);
-        WebElement proxy = (WebElement) Proxy.newProxyInstance(
-                page.getClass().getClassLoader(), new Class[]{WebElement.class}, handler);
         try {
             field.setAccessible(true);
-            field.set(page, new FluentWebElement(proxy));
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            if (isFluentList(field)) {
+                // LocatingElementListHandler is not a good choice, elements are FluentWebElement not WebElement.
+                final InvocationHandler handler = new FluentListInvocationHandler(locator);
+                FluentList<FluentWebElement> proxy = (FluentList<FluentWebElement>) Proxy.newProxyInstance(
+                        page.getClass().getClassLoader(), new Class[]{FluentList.class}, handler);
+                field.set(page, proxy);
+            } else {
+                final InvocationHandler handler = new LocatingElementHandler(locator);
+                WebElement proxy = (WebElement) Proxy.newProxyInstance(
+                        page.getClass().getClassLoader(), new Class[]{WebElement.class}, handler);
+                field.set(page, field.getType().getConstructor(WebElement.class).newInstance(proxy));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to find an accessible constructor with an argument of type WebElement in " + field.getType(), e);
+        }
+    }
+
+    private static class FluentListInvocationHandler implements InvocationHandler {
+
+        private final ElementLocator elementLocator;
+
+        public FluentListInvocationHandler(ElementLocator elementLocator) {
+            this.elementLocator = elementLocator;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            List<WebElement> elements = elementLocator.findElements();
+            FluentListImpl list = new FluentListImpl(FluentIterable.from(elements).transform(new Function<WebElement, FluentWebElement>() {
+                @Override
+                public FluentWebElement apply(WebElement input) {
+                    return new FluentWebElement(input);
+                }
+            }).toList());
+            try {
+                return method.invoke(list, args);
+            } catch (InvocationTargetException e) {
+                // Unwrap the underlying exception
+                throw e.getCause();
+            }
         }
     }
 
@@ -199,6 +264,5 @@ public class FluentAdapter extends Fluent {
             getDriver().quit();
         }
     }
-
 
 }

@@ -20,12 +20,13 @@ import org.fluentlenium.core.FluentThread;
 import org.fluentlenium.core.filter.Filter;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.FluentWait;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.fluentlenium.core.wait.WaitMessage.isPageLoaded;
+
+//import org.openqa.selenium.support.ui.FluentWait;
 
 public class FluentWaitPageMatcher {
     private List<Filter> filters = new ArrayList<Filter>();
@@ -54,15 +55,11 @@ public class FluentWaitPageMatcher {
         if (!(webDriver instanceof JavascriptExecutor)) {
             throw new UnsupportedOperationException("Driver must support javascript execution to use this feature");
         } else {
-            Predicate isLoaded = new com.google.common.base.Predicate<WebDriver>() {
-                public boolean apply( WebDriver webDriver) {
-                    JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+            Predicate<Fluent> isLoaded = new com.google.common.base.Predicate<Fluent>() {
+                public boolean apply(Fluent fluent) {
+                    JavascriptExecutor javascriptExecutor = (JavascriptExecutor) fluent.getDriver();
                     Object result = javascriptExecutor.executeScript("if (document.readyState) return document.readyState;");
-                    if (result != null) {
-                        return "complete".equals((String) result);
-
-                    }
-                    return false;
+                    return result != null && "complete".equals(result);
                 }
             };
             FluentWaitMatcher.until(wait, isLoaded, filters, isPageLoaded(webDriver.getCurrentUrl()));
@@ -76,11 +73,11 @@ public class FluentWaitPageMatcher {
      * check if ou are on the good page calling isAt.
      */
     public void isAt() {
-        if (page == null){
+        if (page == null) {
             throw new IllegalArgumentException("You should use a page argument when you call the untilPage method to specify the page you want to be. Example : await().untilPage(myPage).isAt();");
         }
-        Predicate isLoaded = new com.google.common.base.Predicate<WebDriver>() {
-            public boolean apply( WebDriver webDriver) {
+        Predicate<Fluent> isLoaded = new com.google.common.base.Predicate<Fluent>() {
+            public boolean apply(Fluent fluent) {
                 try {
                     page.isAt();
                 } catch (Error e) {

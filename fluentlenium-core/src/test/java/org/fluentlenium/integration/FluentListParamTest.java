@@ -19,7 +19,7 @@ import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.integration.localtest.LocalFluentCase;
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FluentListParamTest extends LocalFluentCase {
 
@@ -51,14 +51,12 @@ public class FluentListParamTest extends LocalFluentCase {
         FluentList list = find("input");
         assertThat(list.getAttributes("value")).contains("John", "Doe");
     }
-    //<span
     @Test
     public void checkValuesAction() {
         goTo(DEFAULT_URL);
         FluentList list = find("input");
         assertThat(list.getValues()).contains("John", "Doe");
     }
-    //<span class="small" id="id" name="name">Small 1</span>
 
 
     @Test

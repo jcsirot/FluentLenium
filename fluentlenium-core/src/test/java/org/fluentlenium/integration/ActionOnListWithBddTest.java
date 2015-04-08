@@ -14,11 +14,12 @@
 
 package org.fluentlenium.integration;
 
+import org.fluentlenium.core.domain.FluentWebElement;
 import org.fluentlenium.core.domain.FluentList;
 import org.fluentlenium.integration.localtest.LocalFluentCase;
 import org.junit.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ActionOnListWithBddTest extends LocalFluentCase {
 
@@ -26,9 +27,17 @@ public class ActionOnListWithBddTest extends LocalFluentCase {
     @Test
     public void checkFillAction() {
         goTo(DEFAULT_URL);
-        FluentList input = find("input");
+        FluentList input = find("input[type=text]");
         fill(input).with("zzz");
         assertThat(input.getValues()).contains("zzz");
+    }
+
+    @Test
+    public void checkFillActionOnElement() {
+      goTo(DEFAULT_URL);
+      FluentWebElement input = find("input").first();
+      input.fill().with("zzz");
+      assertThat(input.getValue()).contains("zzz");
     }
 
     @Test

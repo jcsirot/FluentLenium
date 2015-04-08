@@ -12,9 +12,6 @@
  * limitations under the License
  */
 package org.fluentlenium.integration;
-import static org.fest.assertions.Assertions.assertThat;
-
-import java.util.concurrent.TimeUnit;
 
 import org.fluentlenium.core.FluentPage;
 import org.fluentlenium.core.annotation.Page;
@@ -23,6 +20,10 @@ import org.fluentlenium.integration.localtest.SauceLabsFluentCase;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AlertOnLabsTest extends SauceLabsFluentCase {
 
@@ -82,6 +83,20 @@ public class AlertOnLabsTest extends SauceLabsFluentCase {
   }
 
   @Test
+  public void should_get_text() {
+    // Given
+    // When
+    alertPage.go();
+    alertPage.maximizeWindow();
+    // Then
+    alertPage.isAt();
+    click("#alertBox");
+    assertThat(alert().getText()).isEqualTo("alertBox");
+    alert().accept();
+
+  }
+
+  @Test
   public void should_prompt() {
     // Given
     // When
@@ -100,7 +115,7 @@ public class AlertOnLabsTest extends SauceLabsFluentCase {
 class AlertPage extends FluentPage {
   @Override
   public String getUrl() {
-    return LocalFluentCase.DEFAULT_URL + "alert.html";
+    return LocalFluentCase.BASE_URL + "alert.html";
   }
 
   @Override
