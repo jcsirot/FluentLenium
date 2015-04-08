@@ -14,12 +14,14 @@
 
 package org.fluentlenium.core.action;
 
+import org.fluentlenium.core.domain.FluentWebElement;
 import org.fluentlenium.core.filter.Filter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class FillSelectConstructor extends org.fluentlenium.core.Fluent {
+    private FluentWebElement fluentWebElement;
     private String cssSelector;
     private Filter[] filters;
 
@@ -29,16 +31,29 @@ public class FillSelectConstructor extends org.fluentlenium.core.Fluent {
         this.filters = filters;
     }
 
+    public FillSelectConstructor(FluentWebElement fluentWebElement, WebDriver webDriver, Filter... filters) {
+        super(webDriver);
+        this.fluentWebElement = fluentWebElement;
+        this.filters = filters;
+    }
+
     /**
      * Select all options that have a value matching the argument for the Select element.
      *
      * @param value
      */
     public FillSelectConstructor withValue(String value) {
-        WebElement selectElement = findFirst(cssSelector, filters).getElement();
+        WebElement selectElement = getElement();
         Select select = new Select(selectElement);
         select.selectByValue(value);
         return this;
+    }
+
+    private WebElement getElement() {
+        if (fluentWebElement == null) {
+            fluentWebElement = findFirst(cssSelector, filters);
+        }
+        return fluentWebElement.getElement();
     }
 
     /**
@@ -47,7 +62,7 @@ public class FillSelectConstructor extends org.fluentlenium.core.Fluent {
      * @param index
      */
     public FillSelectConstructor withIndex(int index) {
-        WebElement selectElement = findFirst(cssSelector, filters).getElement();
+        WebElement selectElement = getElement();
         Select select = new Select(selectElement);
         select.selectByIndex(index);
         return this;
@@ -59,7 +74,7 @@ public class FillSelectConstructor extends org.fluentlenium.core.Fluent {
      * @param text
      */
     public FillSelectConstructor withText(String text) {
-        WebElement selectElement = findFirst(cssSelector, filters).getElement();
+        WebElement selectElement = getElement();
         Select select = new Select(selectElement);
         select.selectByVisibleText(text);
         return this;
